@@ -45,7 +45,7 @@ public class ProtrocolCheck {
 			ctx.init(null, trustManager, null);
 			SSLSocketFactory sf = ctx.getSocketFactory();
 			
-			SSLSocket ss = (SSLSocket) sf.createSocket(ip, 8443);
+			SSLSocket ss = (SSLSocket) sf.createSocket(ip, /*enterporthere*/);
 			
 			String[] protocols=ss.getEnabledProtocols();
 			for(String protocol:protocols)
