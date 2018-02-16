@@ -39,7 +39,7 @@ public class ProtrocolCheck {
 				  }  
 
 			  } }; 
-			InetAddress ip=InetAddress.getByName("10.77.34.157");
+			InetAddress ip=InetAddress.getByName(""); //add ip address as a param
 			//System.out.println(ip.getHostName()+" "+ip.getHostAddress()+" "+ip.getAddress());
 			SSLContext ctx = SSLContext.getInstance("SSL");
 			ctx.init(null, trustManager, null);
