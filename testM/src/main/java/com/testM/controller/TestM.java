@@ -128,4 +128,47 @@ public class TestM {
 
 	}
 
+	@RequestMapping(value = "/deleteOrder/{id}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+	@ResponseBody
+	public List<OrderDetails> deleteOrderDetailsById(HttpServletRequest request, @PathVariable int id) {
+		List<OrderDetails> orderDetails = new ArrayList<OrderDetails>();
+		JSONParser parser = new JSONParser();
+		JSONObject order = new JSONObject();
+		
+		String jsonFilePath = request.getSession().getServletContext().getRealPath("/config/orderdetails.json");
+		
+		File file = new File(jsonFilePath);
+		ObjectMapper objectMapper = new ObjectMapper();
+		
+		try {
+			Object object = parser.parse(new FileReader(jsonFilePath));
+
+			JSONArray orders = (JSONArray) object;
+			orderDetails.addAll(orders);
+			
+			Iterator<JSONObject> itr = orders.iterator();
+			while (itr.hasNext()) {
+				JSONObject tempOrder = new JSONObject();
+				tempOrder = (JSONObject) itr.next();
+				if (tempOrder.toString().contains(String.valueOf(id)))
+					orderDetails.remove(tempOrder);
+			}
+			
+			objectMapper.writeValue(new FileWriter(file.getAbsoluteFile(), false), orderDetails);
+			
+
+		} catch (JsonParseException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return orderDetails;
+	}
 }
