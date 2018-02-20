@@ -29,17 +29,17 @@ import com.testM.model.OrderDetails;
 
 @Controller
 public class TestM {
-	@RequestMapping(value = "/test", method = RequestMethod.GET, headers = "Accept=application/json")
+	@RequestMapping(value = "/orders", method = RequestMethod.GET, headers = "Accept=application/json")
 	@ResponseBody
 	public List<OrderDetails> getOrderDetails(HttpServletRequest request) {
 		List<OrderDetails> orderDetails = new ArrayList<OrderDetails>();
-		JSONParser parser = new JSONParser();
+		JSONParser orderParser = new JSONParser();
 
 		String jsonFilePath = request.getSession().getServletContext().getRealPath("/config/orderdetails.json");
 		try {
-			Object object = parser.parse(new FileReader(jsonFilePath));
+			Object existingOrder = orderParser.parse(new FileReader(jsonFilePath));
 
-			JSONArray orders = (JSONArray) object;
+			JSONArray orders = (JSONArray) existingOrder;
 			orderDetails.addAll(orders);
 		} catch (JsonParseException e) {
 			e.printStackTrace();
@@ -56,24 +56,24 @@ public class TestM {
 		return orderDetails;
 	}
 
-	@RequestMapping(value = "/test/{id}", method = RequestMethod.GET, headers = "Accept=application/json")
+	@RequestMapping(value = "/order/{id}", method = RequestMethod.GET, headers = "Accept=application/json")
 	@ResponseBody
 	public JSONObject getOrderDetailsById(HttpServletRequest request, @PathVariable int id) {
 		List<OrderDetails> orderDetails = new ArrayList<OrderDetails>();
-		JSONParser parser = new JSONParser();
+		JSONParser orderParser = new JSONParser();
 		JSONObject order = new JSONObject();
 
 		String jsonFilePath = request.getSession().getServletContext().getRealPath("/config/orderdetails.json");
 		try {
-			Object object = parser.parse(new FileReader(jsonFilePath));
+			Object existingOrder = orderParser.parse(new FileReader(jsonFilePath));
 
-			JSONArray orders = (JSONArray) object;
+			JSONArray orders = (JSONArray) existingOrder;
 			orderDetails.addAll(orders);
 
-			Iterator<JSONObject> itr = orders.iterator();
-			while (itr.hasNext()) {
+			Iterator<JSONObject> orderItr = orders.iterator();
+			while (orderItr.hasNext()) {
 				JSONObject tempOrder = new JSONObject();
-				tempOrder = (JSONObject) itr.next();
+				tempOrder = (JSONObject) orderItr.next();
 				if (tempOrder.toString().contains(String.valueOf(id)))
 					order = tempOrder;
 			}
@@ -93,24 +93,24 @@ public class TestM {
 		return order;
 	}
 
-	@RequestMapping(value = "/update", method = RequestMethod.POST, consumes = "application/json;charset=UTF-8")
+	@RequestMapping(value = "/freshorder", method = RequestMethod.POST, consumes = "application/json;charset=UTF-8")
 	@ResponseBody
 	public void updateOrderDetails(@RequestBody String json, HttpServletRequest request) {
 
 		String jsonFilePath = request.getSession().getServletContext().getRealPath("/config/orderdetails.json");
 		File file = new File(jsonFilePath);
-		JSONParser parser = new JSONParser();
-		ObjectMapper objectMapper = new ObjectMapper();
+		JSONParser orderParser = new JSONParser();
+		ObjectMapper orderMapper = new ObjectMapper();
 
 		try {
-			Object object = parser.parse(new FileReader(jsonFilePath));
-			JSONArray orders = (JSONArray) object;
-			JSONArray jsonObject = (JSONArray) parser.parse(json);
+			Object existingOrder = orderParser.parse(new FileReader(jsonFilePath));
+			JSONArray orders = (JSONArray) existingOrder;
+			JSONArray inputOrder = (JSONArray) orderParser.parse(json);
 
-			OrderDetails orderDetails = objectMapper.readValue(jsonObject.get(0).toString(), OrderDetails.class);
+			OrderDetails orderDetails = orderMapper.readValue(inputOrder.get(0).toString(), OrderDetails.class);
 			if (orders.toJSONString().indexOf(String.valueOf(orderDetails.getOrderId())) == -1)
 				orders.add(orderDetails);
-			objectMapper.writeValue(new FileWriter(file.getAbsoluteFile(), false), orders);
+			orderMapper.writeValue(new FileWriter(file.getAbsoluteFile(), false), orders);
 
 		} catch (JsonParseException e) {
 			// TODO Auto-generated catch block
@@ -128,33 +128,81 @@ public class TestM {
 
 	}
 
-	@RequestMapping(value = "/deleteOrder/{id}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+	@RequestMapping(value = "/deleteorder/{id}", method = RequestMethod.DELETE, headers = "Accept=application/json")
 	@ResponseBody
 	public List<OrderDetails> deleteOrderDetailsById(HttpServletRequest request, @PathVariable int id) {
 		List<OrderDetails> orderDetails = new ArrayList<OrderDetails>();
-		JSONParser parser = new JSONParser();
-		JSONObject order = new JSONObject();
-		
+		JSONParser orderParser = new JSONParser();
+				
 		String jsonFilePath = request.getSession().getServletContext().getRealPath("/config/orderdetails.json");
 		
 		File file = new File(jsonFilePath);
-		ObjectMapper objectMapper = new ObjectMapper();
+		ObjectMapper orderMapper = new ObjectMapper();
 		
 		try {
-			Object object = parser.parse(new FileReader(jsonFilePath));
+			Object existingOrder = orderParser.parse(new FileReader(jsonFilePath));
 
-			JSONArray orders = (JSONArray) object;
+			JSONArray orders = (JSONArray) existingOrder;
 			orderDetails.addAll(orders);
 			
-			Iterator<JSONObject> itr = orders.iterator();
-			while (itr.hasNext()) {
+			Iterator<JSONObject> orderItr = orders.iterator();
+			while (orderItr.hasNext()) {
 				JSONObject tempOrder = new JSONObject();
-				tempOrder = (JSONObject) itr.next();
+				tempOrder = (JSONObject) orderItr.next();
 				if (tempOrder.toString().contains(String.valueOf(id)))
 					orderDetails.remove(tempOrder);
 			}
 			
-			objectMapper.writeValue(new FileWriter(file.getAbsoluteFile(), false), orderDetails);
+			orderMapper.writeValue(new FileWriter(file.getAbsoluteFile(), false), orderDetails);
+			
+
+		} catch (JsonParseException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return orderDetails;
+	}
+	
+	@RequestMapping(value = "/updateorder/{id}", method = RequestMethod.PUT, headers = "Accept=application/json")
+	@ResponseBody
+	public List<OrderDetails> updateOrderDetailsById(HttpServletRequest request, @PathVariable int id, @RequestBody String json) {
+		
+		List<OrderDetails> orderDetails = new ArrayList<OrderDetails>();
+		JSONParser orderParser = new JSONParser();
+		OrderDetails orderDet=null;
+		String jsonFilePath = request.getSession().getServletContext().getRealPath("/config/orderdetails.json");
+				
+		File file = new File(jsonFilePath);
+		ObjectMapper orderMapper = new ObjectMapper();
+		
+		try {
+			JSONArray inputOrder = (JSONArray) orderParser.parse(json);
+			Object existingOrder = orderParser.parse(new FileReader(jsonFilePath));
+
+			JSONArray orders = (JSONArray) existingOrder;
+			orderDetails.addAll(orders);
+			
+			Iterator<JSONObject> orderItr = orders.iterator();
+			while (orderItr.hasNext()) {
+				JSONObject tempOrder = new JSONObject();
+				tempOrder = (JSONObject) orderItr.next();
+				if (tempOrder.toString().contains(String.valueOf(id))&&inputOrder.get(0).toString().contains(String.valueOf(id))){
+					 orderDet = orderMapper.readValue(inputOrder.get(0).toString(), OrderDetails.class);
+					 orderDetails.remove(tempOrder);
+					 orderDetails.add(orderDet);
+				}
+					
+			}
+			
+			orderMapper.writeValue(new FileWriter(file.getAbsoluteFile(), false), orderDetails);
 			
 
 		} catch (JsonParseException e) {
