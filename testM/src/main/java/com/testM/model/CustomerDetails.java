@@ -15,9 +15,4 @@ public String getAddress() {
 public void setAddress(String address) {
 	this.address = address;
 }
-@Override
-	public String toString() {
-		// TODO Auto-generated method stub
-		return name+" "+address;
-	}
 }

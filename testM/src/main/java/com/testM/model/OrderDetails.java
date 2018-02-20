@@ -1,6 +1,6 @@
 package com.testM.model;
 
-public class OrderDetails {
+public class OrderDetails{
 	
 private int orderId;
 private CustomerDetails custDetails;
@@ -25,9 +25,5 @@ public CustomerDetails getCustDetails() {
 public void setCustDetails(CustomerDetails custDetails) {
 	this.custDetails = custDetails;
 }
-@Override
-	public String toString() {
-		// TODO Auto-generated method stub
-		return orderId+" "+custDetails+" "+itemDetails;
-	}
+
 }

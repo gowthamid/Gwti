@@ -29,9 +29,5 @@ public class ItemDetails {
 	public void setExtras(String extras) {
 		this.extras = extras;
 	}
-	@Override
-	public String toString() {
-		// TODO Auto-generated method stub
-		return itemname+" "+topping+" "+crust+" "+extras;
-	}
+	
 }
